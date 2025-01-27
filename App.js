@@ -1,6 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Button,
+  ScrollView,
+} from "react-native";
 
 export default function App() {
   const [enteredGoalText, setEnteredGoalText] = useState("");
@@ -28,13 +35,17 @@ export default function App() {
         />
       </View>
       <View style={styles.goalsContainer}>
-        {listOfGoals.map((goal) => (
-          <View
-            key={goal}
-            style={styles.goalsListText}>
-            <Text style={styles.goalText}> {goal} </Text>
-          </View>
-        ))}
+        {/*always bounce vertical is a prop for ios devices to make the scroll
+        view always bounce vertically*/}
+        <ScrollView alwaysBounceVertical={false}>
+          {listOfGoals.map((goal) => (
+            <View
+              key={goal}
+              style={styles.goalsListText}>
+              <Text style={styles.goalText}> {goal} </Text>
+            </View>
+          ))}
+        </ScrollView>
       </View>
     </View>
   );
