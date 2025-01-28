@@ -1,53 +1,76 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Button,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, View, Button, FlatList } from "react-native";
+
+import GoalItem from "./components/GoalItem";
+import GoalInput from "./components/GoalInput";
 
 export default function App() {
-  const [enteredGoalText, setEnteredGoalText] = useState("");
   const [listOfGoals, setListOfGoals] = useState([]);
-  function goalInputHandler(enteredText) {
-    setEnteredGoalText(enteredText);
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+
+  function startAddGoalHandler() {
+    setModalIsVisible(true);
   }
 
-  function addGoalHandler() {
+  function endAddGoalHandler() {
+    setModalIsVisible(false);
+  }
+
+  function addGoalHandler(enteredGoalText) {
     //adding into an array the enteredGoalText typed by the users, using a function to automatically receive the existing state by react
     //using an arrow function to get the current state and then adding the new state to it
-    setListOfGoals((currentGoal) => [...currentGoal, enteredGoalText]);
+    //using the key property by Math.random().toString() to generate a random key for each goal
+    setListOfGoals((currentGoal) => [
+      ...currentGoal,
+      { text: enteredGoalText, key: Math.random().toString() },
+    ]);
+    endAddGoalHandler();
   }
+
+  function deleteGoalHandler(id) {
+    setListOfGoals((currentGoal) => {
+      return currentGoal.filter((goal) => goal.id !== id);
+    });
+  }
+
   return (
-    <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Your course goal!"
-          onChangeText={goalInputHandler}
-        />
+    <>
+      {/*StatusBar is a component that allows you to control the appearance of the status bar*/}
+      <StatusBar style="light" />
+      <View style={styles.appContainer}>
         <Button
-          title="Add Goal 🤗"
-          onPress={addGoalHandler}
+          title="Add New Goal"
+          color={"#5e0acc"}
+          onPress={startAddGoalHandler}
         />
-      </View>
-      <View style={styles.goalsContainer}>
-        {/*always bounce vertical is a prop for ios devices to make the scroll
+        <GoalInput
+          visible={modalIsVisible}
+          onAddGoal={addGoalHandler}
+          onCancel={endAddGoalHandler}
+        />
+        <View style={styles.goalsContainer}>
+          {/*always bounce vertical is a prop for ios devices to make the scroll
         view always bounce vertically*/}
-        <ScrollView alwaysBounceVertical={false}>
-          {listOfGoals.map((goal) => (
-            <View
-              key={goal}
-              style={styles.goalsListText}>
-              <Text style={styles.goalText}> {goal} </Text>
-            </View>
-          ))}
-        </ScrollView>
+          <FlatList
+            data={listOfGoals}
+            renderItem={(itemData) => {
+              return (
+                <GoalItem
+                  text={itemData.item.text}
+                  id={itemData.item.key}
+                  onDeleteItem={deleteGoalHandler}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => {
+              return item.key;
+            }}
+            alwaysBounceVertical={false}
+          />
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 
@@ -57,32 +80,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 16,
   },
-  inputContainer: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#cccccc",
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: "#cccccc",
-    width: "70%",
-    marginRight: 8,
-    padding: 8,
-  },
   goalsContainer: {
     flex: 5,
-  },
-  goalsListText: {
-    margin: 8,
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: "#5e0acc",
-  },
-  goalText: {
-    color: "white",
   },
 });
